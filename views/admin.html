@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administratora - Serwis Hulajnóg</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --primary: #8b00ff;
+            --text-dark: #333;
+            --white: #ffffff;
+            --border: #ddd;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
+        body { background: var(--bg-color); color: var(--text-dark); padding: 20px; }
+        
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        /* Login Screen */
+        #login-screen { display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .login-box { background: var(--white); padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        .login-box h2 { margin-bottom: 20px; text-align: center; color: var(--primary); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; }
+        .btn { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        .btn:hover { opacity: 0.9; }
+        .error { color: red; margin-top: 10px; text-align: center; }
+
+        /* Dashboard */
+        #dashboard { display: none; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: var(--white); padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        
+        .card { background: var(--white); padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .card h3 { margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; display: inline-block; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background-color: #f9f9f9; }
+        
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .badge.nowe { background: #ffeaa7; color: #d35400; }
+        .badge.w-trakcie { background: #81ecec; color: #00cec9; }
+        .badge.zakonczone { background: #55efc4; color: #00b894; }
+        
+        .action-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: #666; margin-right: 10px; }
+        .action-btn:hover { color: var(--primary); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; width: auto; }
+        .btn-danger { background: #ff7675; }
+        
+        .slot-form { display: flex; gap: 10px; margin-bottom: 20px; }
+        .slot-form input { padding: 8px; border: 1px solid var(--border); border-radius: 4px; }
+        
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Login -->
+    <div id="login-screen">
+        <div class="login-box">
+            <h2>Panel Admina</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Login</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label>Hasło</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn">Zaloguj się</button>
+                <div id="login-error" class="error"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="container">
+        <div class="header">
+            <h2>Szybki Serwis Hulajnóg - Panel</h2>
+            <button id="logout-btn" class="btn btn-sm" style="width:auto;">Wyloguj</button>
+        </div>
+
+        <div class="grid">
+            <!-- Zarządzanie Terminami -->
+            <div class="card">
+                <h3>Zarządzaj Terminami</h3>
+                <form id="add-slot-form" class="slot-form">
+                    <input type="date" id="slot-date" required>
+                    <input type="time" id="slot-time" required>
+                    <button type="submit" class="btn btn-sm">Dodaj</button>
+                </form>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Godzina</th>
+                            <th>Status</th>
+                            <th>Akcja</th>
+                        </tr>
+                    </thead>
+                    <tbody id="slots-tbody">
+                        <!-- Slots will go here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Rezerwacje -->
+            <div class="card">
+                <h3>Ostatnie Rezerwacje</h3>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Klient</th>
+                                <th>Hulajnoga</th>
+                                <th>Termin</th>
+                                <th>Dostawa</th>
+                                <th>Status</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookings-tbody">
+                            <!-- Bookings will go here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const loginScreen = document.getElementById('login-screen');
+        const dashboard = document.getElementById('dashboard');
+        
+        // --- API Helpers ---
+        async function fetchWithAuth(url, options = {}) {
+            const res = await fetch(url, options);
+            if (res.status === 401) {
+                showLogin();
+                throw new Error('Unauthorized');
+            }
+            return res;
+        }
+
+        // --- Login / Logout ---
+        function showLogin() {
+            loginScreen.style.display = 'flex';
+            dashboard.style.display = 'none';
+        }
+
+        function showDashboard() {
+            loginScreen.style.display = 'none';
+            dashboard.style.display = 'block';
+            loadData();
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (res.ok) {
+                showDashboard();
+            } else {
+                document.getElementById('login-error').innerText = 'Nieprawidłowy login lub hasło.';
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            await fetch('/api/logout', { method: 'POST' });
+            showLogin();
+        });
+
+        // --- Load Data ---
+        async function loadData() {
+            try {
+                const [slotsRes, bookingsRes] = await Promise.all([
+                    fetchWithAuth('/api/admin/slots'),
+                    fetchWithAuth('/api/admin/bookings')
+                ]);
+                
+                const slots = await slotsRes.json();
+                const bookings = await bookingsRes.json();
+                
+                renderSlots(slots);
+                renderBookings(bookings);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // --- Slots ---
+        document.getElementById('add-slot-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const date = document.getElementById('slot-date').value;
+            const time = document.getElementById('slot-time').value;
+            
+            await fetchWithAuth('/api/admin/slots', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date, time })
+            });
+            loadData();
+        });
+
+        async function deleteSlot(id) {
+            if(confirm('Na pewno usunąć ten termin?')) {
+                await fetchWithAuth(`/api/admin/slots/${id}`, { method: 'DELETE' });
+                loadData();
+            }
+        }
+
+        function renderSlots(slots) {
+            const tbody = document.getElementById('slots-tbody');
+            tbody.innerHTML = slots.map(s => `
+                <tr>
+                    <td>${s.date}</td>
+                    <td>${s.time}</td>
+                    <td>${s.is_available ? '<span style="color:green">Wolny</span>' : '<span style="color:red">Zajęty</span>'}</td>
+                    <td>
+                        <button onclick="deleteSlot(${s.id})" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // --- Bookings ---
+        async function updateBookingStatus(id, status) {
+            await fetchWithAuth(`/api/admin/bookings/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status })
+            });
+            loadData();
+        }
+
+        function renderBookings(bookings) {
+            const tbody = document.getElementById('bookings-tbody');
+            tbody.innerHTML = bookings.map(b => {
+                const statusClass = b.status.toLowerCase().replace(' ', '-');
+                return `
+                <tr>
+                    <td>
+                        <strong>${b.name}</strong><br>
+                        <a href="tel:${b.phone}">${b.phone}</a>
+                    </td>
+                    <td>
+                        <strong>${b.model}</strong><br>
+                        <small>${b.issue}</small>
+                    </td>
+                    <td>${b.date ? b.date + ' ' + b.time : 'Brak (usunięty)'}</td>
+                    <td>
+                        ${b.delivery_type}
+                        ${b.address ? `<br><small style="color:#666;">${b.address}</small>` : ''}
+                    </td>
+                    <td>
+                        <select onchange="updateBookingStatus(${b.id}, this.value)" style="padding: 5px; border-radius:4px; border:1px solid #ccc;">
+                            <option value="Nowe" ${b.status === 'Nowe' ? 'selected' : ''}>Nowe</option>
+                            <option value="W trakcie" ${b.status === 'W trakcie' ? 'selected' : ''}>W trakcie</option>
+                            <option value="Zakonczone" ${b.status === 'Zakonczone' ? 'selected' : ''}>Zakończone</option>
+                        </select>
+                    </td>
+                    <td>
+                        <a href="https://wa.me/48${b.phone.replace(/[^0-9]/g, '')}" target="_blank" class="action-btn text-green" title="WhatsApp">
+                            <i class="fa-brands fa-whatsapp" style="color: #25d366;"></i>
+                        </a>
+                        <a href="tel:${b.phone.replace(/[^0-9]/g, '')}" class="action-btn text-primary" title="Zadzwoń">
+                            <i class="fa-solid fa-phone" style="color: #8b00ff;"></i>
+                        </a>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        // Init: Check session implicitly by trying to load data
+        fetchWithAuth('/api/admin/slots').then(() => showDashboard()).catch(() => showLogin());
+
+    </script>
+</body>
+</html>
