@@ -192,14 +192,6 @@ h1, h2, h3, .logo {
                 url('../images/main_foto.jpg') center/cover no-repeat;
 }
 
-/* Zmiana tła na urządzeniach typu laptop/desktop */
-@media (min-width: 768px) {
-    .hero {
-        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.85)), 
-                    url('../images/naprawa.jpg') center/cover no-repeat;
-    }
-}
-
 /* Grunge background effect similar to flyer */
 .hero::before {
     content: "";
